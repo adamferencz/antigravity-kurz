@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zákaz svačin v informatice! 🛑🥪 | IT Tower Defense</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Bar / Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">💻🛑</div>
+      <div class="logo-text">
+        <h1>ZÁKAZ SVAČIN V INFORMATICE!</h1>
+        <p>Ubraň klávesnice a monitory před mastnými prsty a kebaby</p>
+      </div>
+    </div>
+
+    <!-- Live Game Stats -->
+    <div class="stats-bar">
+      <div class="stat-item health" title="Čistota klávesnic v učebně">
+        <span class="icon">🧼</span>
+        <span>Čistota: <strong id="statHealth">20 / 20</strong></span>
+      </div>
+      <div class="stat-item discipline" title="Kázeň (kredity na stavbu věží)">
+        <span class="icon">⭐</span>
+        <span>Kázeň: <strong id="statDiscipline">350</strong></span>
+      </div>
+      <div class="stat-item wave" title="Aktuální přestávka / Vlna">
+        <span class="icon">🔔</span>
+        <span>Přestávka: <strong id="statWave">0 / 10</strong></span>
+      </div>
+    </div>
+
+    <!-- Game Speed & Sound Controls -->
+    <div class="speed-controls">
+      <button class="btn btn-warning" id="btnEarlyWave" style="display: none;">⏩ Další přestávka</button>
+      <button class="btn btn-speed active" data-speed="1">1x</button>
+      <button class="btn btn-speed" data-speed="2">2x</button>
+      <button class="btn btn-speed" data-speed="3">3x</button>
+      <button class="btn" id="btnPause">⏸️ Pauza</button>
+      <button class="btn" id="btnAudio">🔊 Zvuk</button>
+    </div>
+  </header>
+
+  <!-- Main Game Stage -->
+  <main class="game-container">
+    <div class="canvas-wrapper">
+      <!-- Main Game Canvas -->
+      <canvas id="gameCanvas" width="900" height="540"></canvas>
+      
+      <!-- Grease / Screen Smudge Layer (Cleanable by clicking with sponge!) -->
+      <canvas id="greaseCanvas" width="900" height="540"></canvas>
+
+      <!-- Warning Banner for Bosses -->
+      <div id="waveBanner" class="wave-banner">⚠️ POZOR: KEBAB BOSS V ALOBALU!</div>
+
+      <!-- Hint for cleaning grease -->
+      <div id="greaseHint" class="grease-hint">🧽 Mastný flek na monitoru! Klikni hadříkem a získej +10 Kázeň!</div>
+
+      <!-- Game Over Modal -->
+      <div id="gameOverModal" class="modal-overlay">
+        <div class="modal-content game-over">
+          <h2>💀 UČEBNA ZAMAŠTĚNA!</h2>
+          <p>Studenti dotáhli do IT učebny kebaby, chipsy a Colu. Všechny klávesnice se lepí a myši nefungují!</p>
+          <table class="modal-stats-table">
+            <tr><td>Zabavených svačin:</td><td id="goSnacks">0</td></tr>
+            <tr><td>Získaná Kázeň:</td><td id="goDiscipline">0</td></tr>
+            <tr><td>Vyčištěných mastných fleků:</td><td id="goGrease">0</td></tr>
+          </table>
+          <button class="btn btn-primary btn-restart" style="padding: 10px 24px; font-size: 1rem;">🔄 Zkusit znovu</button>
+        </div>
+      </div>
+
+      <!-- Victory Modal -->
+      <div id="victoryModal" class="modal-overlay">
+        <div class="modal-content victory">
+          <h2>🏆 VÍTĚZSTVÍ – ČISTÝ IT LAB!</h2>
+          <p>Skvělá práce! Všechny svačiny byly zabaveny, zvoní na hodinu a všechny počítače zůstaly bez jediné kapky omáčky!</p>
+          <table class="modal-stats-table">
+            <tr><td>Zabavených svačin:</td><td id="vicSnacks">0</td></tr>
+            <tr><td>Získaná Kázeň:</td><td id="vicDiscipline">0</td></tr>
+            <tr><td>Vyčištěných mastných fleků:</td><td id="vicGrease">0</td></tr>
+          </table>
+          <button class="btn btn-primary btn-restart" style="padding: 10px 24px; font-size: 1rem;">🎉 Hrát znovu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Dashboard: Towers Shop & Active Abilities -->
+    <div class="bottom-panel">
+      <!-- Towers Build Bar -->
+      <div class="panel-box">
+        <div class="panel-title">
+          <span>Obránci učebny (Klikni nebo stiskni 1-4)</span>
+          <span style="font-size: 0.75rem; color: #64748b;">Klikni na volné lino vedle chodby</span>
+        </div>
+        <div class="towers-grid">
+          <!-- Teacher -->
+          <div class="tower-card" data-type="teacher">
+            <span class="hotkey">1</span>
+            <div class="icon">👨‍🏫</div>
+            <div class="name">Učitel IT</div>
+            <div class="cost">100 ⭐</div>
+          </div>
+          <!-- Janitor -->
+          <div class="tower-card" data-type="janitor">
+            <span class="hotkey">2</span>
+            <div class="icon">🧹</div>
+            <div class="name">Školník s mopem</div>
+            <div class="cost">140 ⭐</div>
+          </div>
+          <!-- Router -->
+          <div class="tower-card" data-type="router">
+            <span class="hotkey">3</span>
+            <div class="icon">📡</div>
+            <div class="name">Wi-Fi Router</div>
+            <div class="cost">200 ⭐</div>
+          </div>
+          <!-- Printer -->
+          <div class="tower-card" data-type="printer">
+            <span class="hotkey">4</span>
+            <div class="icon">🖨️</div>
+            <div class="name">Zaseknutá Tiskárna</div>
+            <div class="cost">260 ⭐</div>
+          </div>
+        </div>
+
+        <!-- Selected Placed Tower Inspector & Branching Upgrades -->
+        <div id="selectionPanel" class="selection-details" style="display: none;">
+          <div class="details-content">
+            <div id="selTowerIcon" style="font-size: 2.2rem;">👨‍🏫</div>
+            <div>
+              <h4 id="selTowerName" style="color: #38bdf8; margin-bottom: 2px;">Učitel informatiky (Lvl 1)</h4>
+              <div id="selTowerStats" class="details-stats">Poškození: 24 | Rychlost: 0.75s | Dosah: 145px</div>
+            </div>
+          </div>
+          <div id="selTowerActions" class="details-actions">
+            <!-- Dynamically injected upgrade / branch / sell buttons -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Teacher Abilities (Clickable Superpowers) -->
+      <div class="panel-box">
+        <div class="panel-title">
+          <span>Učitelské super-schopnosti</span>
+        </div>
+        <div class="abilities-grid">
+          <!-- Broadcast Stun -->
+          <button class="ability-btn" id="btnAbilityBroadcast">
+            <div class="ability-info">
+              <span class="icon">📢</span>
+              <div>
+                <div class="ability-title">Školní rozhlas</div>
+                <div class="ability-desc">Zastaví všechny studenty na 4s</div>
+              </div>
+            </div>
+            <div class="ability-cooldown" id="cdAbilityBroadcast">PŘIPRAVENO (Q)</div>
+          </button>
+
+          <!-- Coffee Boost -->
+          <button class="ability-btn" id="btnAbilityCoffee">
+            <div class="ability-info">
+              <span class="icon">☕</span>
+              <div>
+                <div class="ability-title">Káva ze sborovny</div>
+                <div class="ability-desc">2x rychlost střelby všech věží na 8s</div>
+              </div>
+            </div>
+            <div class="ability-cooldown" id="cdAbilityCoffee">PŘIPRAVENO (W)</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script Modules (Loaded in dependency order) -->
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/enemies.js"></script>
+  <script src="js/towers.js"></script>
+  <script src="js/waves.js"></script>
+  <script src="js/game.js"></script>
+
+</body>
+</html>
